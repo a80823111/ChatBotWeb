@@ -1,0 +1,92 @@
+﻿/*所屬專案*/
+CREATE TABLE Project(
+	ProjectPk INT IDENTITY PRIMARY KEY,
+	[Guid] UNIQUEIDENTIFIER UNIQUE NOT NULL,
+	[Name] NVARCHAR(200) NOT NULL,
+	ValidDate DATETIME NOT NULL, --有效日期
+	[Status] TINYINT NOT NULL,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL,
+)
+
+/*Api類型 ex. FB,Line,Google*/
+CREATE TABLE MessageApiKind(
+	MessageApiKindPk INT IDENTITY PRIMARY KEY,
+	[Name] NVARCHAR(200) NOT NULL,
+	[Version] NVARCHAR(200) NOT NULL,
+	ApiDomain NVARCHAR(200) NOT NULL
+)
+
+/*專案與Api類型關聯 & Api連線Token*/
+CREATE TABLE ProjectApi(
+	ProjectApiPk INT IDENTITY PRIMARY KEY,
+	MessageApiKindPk INT NOT NULL,
+	AccessToken NVARCHAR(500),
+	[Secret] NVARCHAR(500),
+	[Status] TINYINT NOT NULL,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL,
+	FOREIGN KEY (MessageApiKindPk) REFERENCES MessageApiKind (MessageApiKindPk)
+)
+
+
+/*使用者基本資料*/
+CREATE TABLE [User](
+	UserPk INT IDENTITY PRIMARY KEY,
+	[Guid] UNIQUEIDENTIFIER UNIQUE NOT NULL,
+	Account NVARCHAR(15) NOT NULL,
+	[Password]  NVARCHAR(200) NOT NULL,
+	[Name] NVARCHAR(200),
+	ID NVARCHAR(20),
+	BIRTHDATE DATE,
+	MobileTel NVARCHAR(20),
+	HomeTel NVARCHAR(20),
+	City NVARCHAR(100),
+	[Address] NVARCHAR(100),
+	Email NVARCHAR(100),
+	Sex TINYINT,
+	LanSetting NVARCHAR(20), --語系
+	[Status] TINYINT NOT NULL,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL,
+)
+
+/*聊天對話基本檔*/
+CREATE TABLE ChatBasic(
+	ChatBasicPk BIGINT IDENTITY PRIMARY KEY,
+	ProjectPk INT NOT NULL,
+	Ask NVARCHAR(MAX) NOT NULL, --詢問
+	Reply NVARCHAR(MAX) NOT NULL, --回覆
+	Keyword NVARCHAR(200),
+	[Status] TINYINT NOT NULL,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL
+	FOREIGN KEY (ProjectPk) REFERENCES Project (ProjectPk)
+)
+
+/*聊天名單*/
+CREATE TABLE ChatOrder(
+	ChatOrderPk BIGINT IDENTITY PRIMARY KEY,
+	ProjectApiPk INT NOT NULL,
+	ProjectPk INT NOT NULL,
+	[Name] NVARCHAR(200) NOT NULL,
+	Account NVARCHAR(100) ,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL,
+	FOREIGN KEY (ProjectPk) REFERENCES Project (ProjectPk),
+	FOREIGN KEY (ProjectApiPk) REFERENCES ProjectApi (ProjectApiPk)
+)
+
+/*聊天歷史紀錄*/
+CREATE TABLE ChatHistory(
+	ChatHistoryPk BIGINT IDENTITY PRIMARY KEY,
+	ProjectPk INT NOT NULL,
+	Ask NVARCHAR(MAX) NOT NULL,
+	Reply NVARCHAR(MAX) NOT NULL,
+	ChatOrderPk BIGINT NOT NULL,
+	[Status] TINYINT NOT NULL,
+	CreateDate DATETIME NOT NULL,
+	Creater NVARCHAR(100) NOT NULL
+	FOREIGN KEY (ProjectPk) REFERENCES Project (ProjectPk),
+	FOREIGN KEY (ChatOrderPk) REFERENCES ChatOrder (ChatOrderPk)
+)
